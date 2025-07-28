@@ -29,6 +29,11 @@ spec:
         # Cainjector configuration
         cainjector:
           enabled: true
+          leaderElection:
+            namespace: cert-manager
+        # Controller configuration
+        leaderElection:
+          namespace: cert-manager
         # Startupapicheck configuration
         startupapicheck:
           enabled: true
