@@ -25,6 +25,6 @@ spec:
           secretAccessKeySecretRef:
             name: cert-manager-route53-credentials
             key: secret-access-key
-        selector:
-          dnsZones:
-          - "goldentooth.net"
+      selector:
+        dnsZones:
+        - "goldentooth.net"
