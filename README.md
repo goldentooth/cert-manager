@@ -11,7 +11,8 @@ cert-manager automates certificate management in Kubernetes using ACME protocol.
 - **cert-manager**: Kubernetes-native certificate management
 - **step-ca**: Private certificate authority (running on jast:9443)
 - **ACME protocol**: Automated certificate issuance and renewal
-- **ClusterIssuer**: Configured for step-ca ACME endpoint
+- **ClusterIssuer**: Configured for step-ca ACME endpoint with DNS-01 validation
+- **Route53**: AWS Route53 DNS-01 challenges for domain validation
 
 ## Prerequisites
 
@@ -25,7 +26,8 @@ The chart includes:
 
 1. **cert-manager Application**: ArgoCD application for cert-manager deployment
 2. **step-ca Root Certificate**: Secret containing the step-ca root CA certificate
-3. **ClusterIssuer**: ACME issuer pointing to step-ca ACME endpoint
+3. **ClusterIssuer**: ACME issuer pointing to step-ca ACME endpoint with DNS-01 validation
+4. **AWS Credentials**: Secret containing Route53 credentials for DNS challenges
 
 ## Usage
 
@@ -85,11 +87,40 @@ step ca provisioner add acme --type ACME
 
 ## Deployment
 
-Deploy via ArgoCD by adding this chart to the gitops repository:
+### 1. Configure AWS Credentials
+
+First, ensure you have AWS credentials with Route53 permissions. You can use the same credentials as external-dns:
 
 ```bash
-# Add to ArgoCD applications
-helm template cert-manager . --namespace argocd | kubectl apply -f -
+# Get existing credentials from external-dns
+kubectl get secret external-dns -n external-dns -o jsonpath='{.data.credentials}' | base64 -d
+```
+
+### 2. Deploy via ArgoCD
+
+Deploy the chart with AWS credentials:
+
+```bash
+# Set AWS credentials during deployment
+helm template cert-manager . \
+  --namespace argocd \
+  --set spec.aws.accessKeyID="YOUR_ACCESS_KEY_ID" \
+  --set spec.aws.secretAccessKey="YOUR_SECRET_ACCESS_KEY" | \
+  kubectl apply -f -
+```
+
+Or create a custom values file with your credentials:
+
+```yaml
+# custom-values.yaml
+spec:
+  aws:
+    accessKeyID: "YOUR_ACCESS_KEY_ID"
+    secretAccessKey: "YOUR_SECRET_ACCESS_KEY"
+```
+
+```bash
+helm template cert-manager . --namespace argocd -f custom-values.yaml | kubectl apply -f -
 ```
 
 ## Monitoring
@@ -102,11 +133,26 @@ kubectl get certificaterequests -A
 kubectl describe clusterissuer step-ca-acme-issuer
 ```
 
+## DNS-01 Validation
+
+This configuration uses DNS-01 challenges via AWS Route53, which provides several advantages:
+
+- **No ingress controller required**: Works without nginx or other ingress controllers
+- **Wildcard certificate support**: Can issue `*.goldentooth.net` certificates
+- **Private services**: Can validate domains for services not exposed to the internet
+- **Firewall friendly**: No need to expose challenge endpoints
+
+DNS-01 challenges work by creating TXT records in Route53 that step-ca validates.
+
 ## Troubleshooting
 
-1. **ACME Challenge Failures**: Ensure DNS or HTTP01 challenges can reach your domains
+1. **DNS-01 Challenge Failures**: 
+   - Check AWS credentials have Route53 permissions
+   - Verify DNS zone configuration in Route53
+   - Ensure step-ca can resolve DNS queries
 2. **Root CA Issues**: Verify the step-ca root certificate is correctly configured
 3. **Network Connectivity**: Ensure cert-manager can reach step-ca at 10.4.0.19:9443
+4. **AWS Permissions**: Ensure AWS credentials have `route53:ChangeResourceRecordSets` permission
 
 ## Security
 

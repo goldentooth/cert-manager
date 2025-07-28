@@ -32,3 +32,10 @@ spec:
       om0/XlIKlrUSzehNxM4CIQC1ECAl8ksyXrmBIsvGSP1iEft41xj+Ys4aZOjK+ryL
       HQ==
       -----END CERTIFICATE-----
+      
+  # AWS Route53 configuration for DNS-01 challenges
+  # Note: AWS credentials should be provided during deployment
+  # Example: --set spec.aws.accessKeyID=YOUR_KEY --set spec.aws.secretAccessKey=YOUR_SECRET
+  aws:
+    accessKeyID: ""
+    secretAccessKey: ""

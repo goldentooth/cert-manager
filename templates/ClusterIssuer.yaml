@@ -16,13 +16,15 @@ spec:
       name: step-ca-acme-private-key
     # Custom CA bundle for step-ca
     caBundle: {{ .Values.spec.stepCA.rootCA | b64enc | quote }}
-    # HTTP01 solver for domain validation
+    # DNS-01 solver for domain validation
     solvers:
-    - http01:
-        ingress:
-          class: nginx
-      selector: {}
     - dns01:
-        webhook:
-          groupName: acme.cert-manager.io
-          solverName: step-ca-solver
+        route53:
+          region: us-east-1
+          accessKeyID: "{{ .Values.spec.aws.accessKeyID }}"
+          secretAccessKeySecretRef:
+            name: cert-manager-route53-credentials
+            key: secret-access-key
+        selector:
+          dnsZones:
+          - "goldentooth.net"
