@@ -87,41 +87,33 @@ step ca provisioner add acme --type ACME
 
 ## Deployment
 
-### 1. Configure AWS Credentials
+### 1. Create AWS Credentials Secret
 
-First, ensure you have AWS credentials with Route53 permissions. You can use the same credentials as external-dns:
+Create the AWS credentials secret manually in the cert-manager namespace:
 
 ```bash
-# Get existing credentials from external-dns
+# Get existing credentials from external-dns if available
 kubectl get secret external-dns -n external-dns -o jsonpath='{.data.credentials}' | base64 -d
+
+# Create the secret manually (replace with your actual credentials)
+kubectl create secret generic cert-manager-route53-credentials \
+  --from-literal=secret-access-key=YOUR_AWS_SECRET_ACCESS_KEY \
+  -n cert-manager
 ```
 
 ### 2. Deploy via ArgoCD
 
-Deploy the chart with AWS credentials:
+Deploy the chart with your AWS access key ID:
 
 ```bash
-# Set AWS credentials during deployment
+# Deploy with access key ID
 helm template cert-manager . \
   --namespace argocd \
-  --set spec.aws.accessKeyID="YOUR_ACCESS_KEY_ID" \
-  --set spec.aws.secretAccessKey="YOUR_SECRET_ACCESS_KEY" | \
+  --set spec.aws.accessKeyID="YOUR_ACCESS_KEY_ID" | \
   kubectl apply -f -
 ```
 
-Or create a custom values file with your credentials:
-
-```yaml
-# custom-values.yaml
-spec:
-  aws:
-    accessKeyID: "YOUR_ACCESS_KEY_ID"
-    secretAccessKey: "YOUR_SECRET_ACCESS_KEY"
-```
-
-```bash
-helm template cert-manager . --namespace argocd -f custom-values.yaml | kubectl apply -f -
-```
+**Important**: The secret access key is provided via the manually created Secret, while the access key ID is provided via Helm values. This approach keeps secrets out of Git while allowing ArgoCD deployment.
 
 ## Monitoring
 
