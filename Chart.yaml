@@ -1,0 +1,6 @@
+apiVersion: 'v2'
+name: 'cert-manager'
+description: 'GitOps repository for cert-manager with step-ca integration'
+type: 'application'
+version: '0.0.1'
+appVersion: '1.16.2'

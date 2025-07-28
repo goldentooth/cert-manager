@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: "{{ .Values.spec.releaseName }}"
+  namespace: argocd
+  labels:
+    name: "{{ .Values.spec.releaseName }}"
+    managed-by: 'argocd'
+  annotations:
+    argocd.argoproj.io/wave: '-3'
+spec:
+  project: "{{ .Values.spec.projectName }}"
+  source:
+    repoURL: "{{ .Values.spec.source.repoURL }}"
+    chart: "{{ .Values.spec.source.chart }}"
+    targetRevision: "{{ .Values.spec.source.targetRevision }}"
+    helm:
+      releaseName: "{{ .Values.spec.releaseName }}"
+      valuesObject:
+        # Enable CRD installation
+        crds:
+          enabled: true
+        # Global configuration
+        global:
+          logLevel: 2
+        # Webhook configuration
+        webhook:
+          securePort: 10250
+        # Cainjector configuration
+        cainjector:
+          enabled: true
+        # Startupapicheck configuration
+        startupapicheck:
+          enabled: true
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: "{{ .Values.spec.namespace }}"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - Validate=true
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+      - RespectIgnoreDifferences=true
+      - ApplyOutOfSyncOnly=true

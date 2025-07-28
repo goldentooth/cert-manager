@@ -1,0 +1,34 @@
+spec:
+  projectName: gitops-repo
+  releaseName: cert-manager
+  namespace: cert-manager
+  
+  # cert-manager upstream chart configuration
+  source:
+    repoURL: 'https://charts.jetstack.io'
+    chart: 'cert-manager'
+    targetRevision: 'v1.16.2'
+    helm:
+      releaseName: 'cert-manager'
+      version: v3
+      
+  # Step-CA integration configuration
+  stepCA:
+    # step-ca runs on jast node
+    url: "https://10.4.0.19:9443"
+    # ACME provisioner name in step-ca
+    provisioner: "acme"
+    # Root certificate for step-ca (will be mounted as Secret)
+    rootCA: |
+      -----BEGIN CERTIFICATE-----
+      MIIBrTCCAVKgAwIBAgIRAO97zZ5qyeALzaThuCwUZr8wCgYIKoZIzj0EAwIwNDEU
+      MBIGA1UEChMLZ29sZGVudG9vdGgxHDAaBgNVBAMTE2dvbGRlbnRvb3RoIFJvb3Qg
+      Q0EwHhcNMjUwNTE2MjI0NzA4WhcNMzUwNTE0MjI0NzA4WjA0MRQwEgYDVQQKEwtn
+      b2xkZW50b290aDEcMBoGA1UEAxMTZ29sZGVudG9vdGggUm9vdCBDQTBZMBMGByqG
+      SM49AgEGCCqGSM49AwEHA0IABGnLdUQVMjanMkuHvl8tAVaIEBbJZOqxA/NEyJNC
+      X1hQm148NMwCamYIQL/i2tyKqwV6MVe7N1JfKCasKWQ0jVijRTBDMA4GA1UdDwEB
+      /wQEAwIBBjASBgNVHRMBAf8ECDAGAQH/AgEBMB0GA1UdDgQWBBRqxhWmLGm4Til+
+      OSaYl5UCWG+c0zAKBggqhkjOPQQDAgNJADBGAiEA53HhxpcUdY/wWooLiDC/a3Zd
+      om0/XlIKlrUSzehNxM4CIQC1ECAl8ksyXrmBIsvGSP1iEft41xj+Ys4aZOjK+ryL
+      HQ==
+      -----END CERTIFICATE-----
