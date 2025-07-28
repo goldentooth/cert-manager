@@ -89,31 +89,29 @@ step ca provisioner add acme --type ACME
 
 ### 1. Create AWS Credentials Secret
 
-Create the AWS credentials secret manually in the cert-manager namespace:
+Create the AWS credentials secret manually in the cert-manager namespace. Both the access key ID and secret access key must be managed outside of IaC:
 
 ```bash
 # Get existing credentials from external-dns if available
 kubectl get secret external-dns -n external-dns -o jsonpath='{.data.credentials}' | base64 -d
 
-# Create the secret manually (replace with your actual credentials)
-kubectl create secret generic cert-manager-route53-credentials \
+# Create the secret manually with both credentials (replace with your actual credentials)
+kubectl create secret generic cert-manager-aws-credentials \
+  --from-literal=access-key-id=YOUR_AWS_ACCESS_KEY_ID \
   --from-literal=secret-access-key=YOUR_AWS_SECRET_ACCESS_KEY \
   -n cert-manager
 ```
 
 ### 2. Deploy via ArgoCD
 
-Deploy the chart with your AWS access key ID:
+Deploy the chart (no AWS credentials needed in deployment):
 
 ```bash
-# Deploy with access key ID
-helm template cert-manager . \
-  --namespace argocd \
-  --set spec.aws.accessKeyID="YOUR_ACCESS_KEY_ID" | \
-  kubectl apply -f -
+# Deploy without any credential parameters
+helm template cert-manager . --namespace argocd | kubectl apply -f -
 ```
 
-**Important**: The secret access key is provided via the manually created Secret, while the access key ID is provided via Helm values. This approach keeps secrets out of Git while allowing ArgoCD deployment.
+**Important**: All AWS credentials are managed outside of IaC and must be created manually. The ClusterIssuer references the manually created Secret for both access key ID and secret access key.
 
 ## Monitoring
 

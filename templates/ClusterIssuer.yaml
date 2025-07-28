@@ -21,13 +21,16 @@ spec:
     - dns01:
         route53:
           region: us-east-1
-          # AWS credentials should be created manually as a Secret
-          # kubectl create secret generic cert-manager-route53-credentials \
-          #   --from-literal=secret-access-key=YOUR_SECRET_KEY \
+          # AWS credentials must be created manually outside of IaC
+          # kubectl create secret generic cert-manager-aws-credentials \
+          #   --from-literal=access-key-id=YOUR_ACCESS_KEY_ID \
+          #   --from-literal=secret-access-key=YOUR_SECRET_ACCESS_KEY \
           #   -n cert-manager
-          accessKeyID: "{{ .Values.spec.aws.accessKeyID | default "CHANGE_ME" }}"
+          accessKeyIDSecretRef:
+            name: cert-manager-aws-credentials
+            key: access-key-id
           secretAccessKeySecretRef:
-            name: cert-manager-route53-credentials
+            name: cert-manager-aws-credentials
             key: secret-access-key
       selector:
         dnsZones:

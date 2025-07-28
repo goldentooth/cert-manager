@@ -34,8 +34,5 @@ spec:
       -----END CERTIFICATE-----
       
   # AWS Route53 configuration for DNS-01 challenges
-  # Note: AWS access key ID should be provided during deployment
-  # Secret access key must be created manually as a Secret in cert-manager namespace
-  # Example: --set spec.aws.accessKeyID=AKIAI...
-  aws:
-    accessKeyID: ""  # Set this during deployment
+  # Note: AWS credentials must be created manually outside of IaC
+  # Both access key ID and secret access key are stored in a manually created Secret
